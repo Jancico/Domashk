@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 # ----------------------------
 @dataclass
 class Config:
-    base_url: str = "https://example.org"  # поменяешь на адрес своего сайта
+    base_url: str = "https://creditcalculator.pointschool.ru/credit"  # поменяешь на адрес своего сайта
     timeout: int = 10                       # сек. ожидания элементов
 
 
@@ -41,38 +41,49 @@ def make_driver(headless: bool = False) -> WebDriver:
 Locator = Tuple[str, str]  # например: (By.CSS_SELECTOR, "input[name='q']")
 
 class BasePage:
+    """Базовая страница для Page Object: хранит драйвер, ожидания и конфиг."""
+
     def __init__(self, driver: WebDriver, cfg: Config):
+        # Сохраняем драйвер и конфиг, настраиваем явные ожидания
         self.driver = driver
         self.wait = WebDriverWait(driver, cfg.timeout)
         self.cfg = cfg
 
     def open(self, path: str = "/"):
-        # если передаём абсолютный URL, просто едем по нему
+        """Открыть страницу: абсолютный URL или относительный к base_url."""
+        # Если путь — полный URL, едем прямо по нему
         if path.startswith("http"):
             self.driver.get(path)
         else:
+            # Иначе собираем URL из base_url и относительного пути
             self.driver.get(self.cfg.base_url.rstrip("/") + "/" + path.lstrip("/"))
 
     def find(self, locator: Locator):
+        """Дождаться присутствия элемента в DOM и вернуть его (может быть невидим)."""
         return self.wait.until(EC.presence_of_element_located(locator))
 
     def visible(self, locator: Locator):
+        """Дождаться видимости элемента и вернуть его."""
         return self.wait.until(EC.visibility_of_element_located(locator))
 
     def click(self, locator: Locator):
+        """Дождаться кликабельности элемента и кликнуть по нему."""
         el = self.wait.until(EC.element_to_be_clickable(locator))
         el.click()
 
     def type(self, locator: Locator, text: str, clear: bool = True):
+        """Ввести текст в видимый элемент; по умолчанию предварительно очистить поле."""
         el = self.visible(locator)
         if clear:
-            el.clear()
+            el.clear()  # Очистка инпута перед вводом
         el.send_keys(text)
 
     def text(self, locator: Locator) -> str:
+        """Получить видимый текст элемента."""
         return self.visible(locator).text
 
     def exists(self, locator: Locator) -> bool:
+        """Проверить, что элемент присутствует в DOM (без падения теста)."""
         try:
             self.find(locator)
             return True
@@ -80,4 +91,6 @@ class BasePage:
             return False
 
     def url_contains(self, fragment: str):
+        """Дождаться, что текущий URL содержит заданный фрагмент."""
         self.wait.until(EC.url_contains(fragment))
+
