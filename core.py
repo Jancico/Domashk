@@ -74,6 +74,8 @@ class BasePage:
     def type(self, locator: Locator, text: str, clear: bool = True):
         """Ввести текст в видимый элемент; по умолчанию предварительно очистить поле."""
         el = self.visible(locator)
+        el.click()
+        
         if clear:
             el.clear()  # Очистка инпута перед вводом
         el.send_keys(text)

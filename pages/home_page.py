@@ -2,7 +2,7 @@
 from selenium.webdriver.common.by import By
 from core import BasePage, Locator
 from selenium.webdriver.support.ui import Select
-
+import time
 
 
 # здесь храним локаторы и «атомарные» действия.
@@ -52,7 +52,7 @@ INCOME_DOC_2NDFL_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'2
 WORK_REGION_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'Место работы в регионе')]/following::select[1]")
 
 # Доход
-NET_INCOME_INPUT: Locator = (By.XPATH, "//*[contains(normalize-space(),'Чистый доход в месяц')]/following::input[1]")
+NET_INCOME_INPUT: Locator = (By.XPATH, "//*[@id='credit-data-user-form']/div[2]/form/div[8]/div[2]/input")
 
 # Регистрация/судимость/имущество
 REGISTRATION_REGION_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'Место прописки в регионе')]/following::select[1]")
@@ -89,74 +89,99 @@ EMAIL_INPUT: Locator = (By.XPATH, "//input[@type='email' or @name='email' or @pl
 EMAIL_SEND_BUTTON: Locator = (By.XPATH, "//button[.//text()[contains(.,'Отправить')]]")
 
 
-
-def test_01(page: BasePage):
+def Open_base_page(page: BasePage):
     """Открыть главную страницу сайта."""
     page.open("/")  # относительный путь — приклеится к base_url
 
-    """Дождаться появления и нажать РАССЧИТАТЬ."""
-    page.find(CALCULATE_BUTTON) 
-    page.click(CALCULATE_BUTTON)  
+    """нажать РАССЧИТАТЬ."""
+def click_CALCULATE_BUTTON(page: BasePage): 
+    page.click(CALCULATE_BUTTON) 
 
-    """Дождаться появления и нажать заполните анкету."""
-    page.find(ADVANCED_CALCULATE_BUTTON) 
+
+    """ нажать заполните анкету."""
+def click_ADVANCED_CALCULATE_BUTTON(page: BasePage): 
     page.click(ADVANCED_CALCULATE_BUTTON) 
 
-    """заполнить поля и выбрать варианты из ракскрывающихся списков"""
-    page.type(CALC_AMOUNT_INPUT, 100000)
-    page.type(CALC_DOWNPAYMENT_INPUT, 0)
-    page.type(CALC_TERM_INPUT, 12)
 
-    page.type(LAST_NAME_INPUT, "Ярцова")
-    page.type(FIRST_NAME_INPUT, "Злата")
-    page.type(MIDDLE_NAME_INPUT, "Васильевна")
+    """Упрощенный калькулятор"""
+def Simple_calculator_input (
+    page: BasePage, 
+    Amount:      int = 100000, 
+    Downpaymant: int = 0, 
+    Term:        int = 12): 
 
-    page.type(PASSPORT_NUMBER_INPUT, "4300 542277")
-    page.type(PASSPORT_ISSUED_BY_INPUT, "Нижегородское ГОВД")
-    page.type(PASSPORT_ISSUE_DATE, "11.11.2011")
+    page.type(CALC_AMOUNT_INPUT, Amount)
+    page.type(CALC_DOWNPAYMENT_INPUT, Downpaymant)
+    page.type(CALC_TERM_INPUT, Term)
 
-    page.type(NET_INCOME_INPUT, "35000")
 
-    # В выпадающем списке «Образование» выбрать «высшее»
-    el = page.visible(EDUCATION_SELECT)      # дождались, что select виден
-    Select(el).select_by_value("1")   # выбор по атрибуту value
+    """Поля имени фамилии и отчества"""
+def Name_input(
+    page: BasePage, 
+    First_name:  str = "Злата", 
+    Last_name:   str = "Ярцова", 
+    Middle_name: str = "Васильевна"):
 
-    # В выпадающем списке «Общий трудовой стаж» выбрать «5-10 лет»
-    el = page.visible(WORK_EXPERIENCE_TOTAL_SELECT)      
-    Select(el).select_by_value("3")   
+    page.type(FIRST_NAME_INPUT, First_name)
+    page.type(LAST_NAME_INPUT, Last_name)
+    page.type(MIDDLE_NAME_INPUT, Middle_name)
 
-    # В выпадающем списке «Срок работы на последнем месте (официальная занятость)» выбрать «более 3 лет»
-    el = page.visible(WORK_EXPERIENCE_LASTJOB_SELECT)      
-    Select(el).select_by_value("4") 
+
+    """Данные поспорта"""
+def Pasport_info_input(
+    page: BasePage, 
+    Passport_number: str = "4300 542277", 
+    Issued_by:       str = "Нижегородское ГОВД", 
+    Issued_date:     str = "11.11.2011"):
+
+    page.type(PASSPORT_NUMBER_INPUT, Passport_number)
+    page.type(PASSPORT_ISSUED_BY_INPUT, Issued_by)
+    page.type(PASSPORT_ISSUE_DATE, Issued_date)
+
+
+    """Образование и работа клиента"""
+def Work_edukation_input(
+    page: BasePage, 
+    Education:  int | str = 1, 
+    Work_total: int | str = 3, 
+    Last_job:   int | str = 4, 
+    NDFL:       int | str = 1, 
+    Region:     int | str = 1, 
+    Income:     int | str = 35000):
     
-    # В выпадающем списке «Подтверждение дохода справкой 2НДФЛ» выбрать «Да»
-    el = page.visible(INCOME_DOC_2NDFL_SELECT)      
-    Select(el).select_by_value("1") 
-
-    # В выпадающем списке «Место работы в регионе регистрации банка?» выбрать «Да»
-    el = page.visible(WORK_REGION_SELECT)      
-    Select(el).select_by_value("1") 
+    Education  = str(Education)
+    Work_total = str(Work_total)
+    Last_job   = str(Last_job)
+    NDFL       = str(NDFL)
+    Region     = str(Region)
+    Income     = str(Income)
     
-    # В выпадающем списке «Место прописки в регионе регистрации банка?» выбрать «Да»
-    el = page.visible(REGISTRATION_REGION_SELECT)      
-    Select(el).select_by_value("1") 
-    
-    # В выпадающем списке «Есть ли у вас судимость?» выбрать «Нет»
-    el = page.visible(CRIMINAL_RECORD_SELECT)      
-    Select(el).select_by_value("2") 
-    
-    # В выпадающем списке «Есть ли у вас в собственности автомобиль?» выбрать «Да»
-    el = page.visible(HAS_CAR_SELECT)      
-    Select(el).select_by_value("1") 
-    
-    # В выпадающем списке «Есть ли у вас в собственности недвижимость?» выбрать «Да»
-    el = page.visible(HAS_PROPERTY_SELECT)      
-    Select(el).select_by_value("1") 
-
-    # Нажать кнопку «Рассчитать»
-    page.click(CALCULATE_BUTTON)
+    # выбор по атрибуту value, выпадаюший список нумеруется с единицы
+    Select(page.visible(EDUCATION_SELECT)).select_by_value(Education)   
+    Select(page.visible(WORK_EXPERIENCE_TOTAL_SELECT)).select_by_value(Work_total)   
+    Select(page.visible(WORK_EXPERIENCE_LASTJOB_SELECT)).select_by_value(Last_job) 
+    Select(page.visible(INCOME_DOC_2NDFL_SELECT)).select_by_value(NDFL) 
+    Select(page.visible(WORK_REGION_SELECT)).select_by_value(Region)
+    page.visible(NET_INCOME_INPUT)
+    page.type(NET_INCOME_INPUT, Income)
     
 
+    """Прочая информация"""
+def Other_information(
+    page: BasePage, 
+    Registration_region: int | str = 1, 
+    Criminal:            int | str = 3, 
+    Has_car:             int | str = 1, 
+    Has_property:        int | str = 1):
 
+    Registration_region  = str(Registration_region)
+    Criminal             = str(Criminal)
+    Has_car              = str(Has_car)
+    Has_property         = str(Has_property)
 
-# Проверить результаты расчета
+    Select(page.visible(REGISTRATION_REGION_SELECT)).select_by_value(Registration_region) 
+    Select(page.visible(CRIMINAL_RECORD_SELECT)).select_by_value(Criminal) 
+    Select(page.visible(HAS_CAR_SELECT)).select_by_value(Has_car) 
+    Select(page.visible(HAS_PROPERTY_SELECT)).select_by_value(Has_property) 
+    
+    

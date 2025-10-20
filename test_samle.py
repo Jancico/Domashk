@@ -1,7 +1,9 @@
 # test_sample.py
 import pytest
+import time
 from core import make_driver, Config, BasePage
 from pages import home_page as Home
+
 
 @pytest.fixture
 def driver():
@@ -17,5 +19,18 @@ def page(driver):
     )
     return BasePage(driver, cfg)
 
+
 def test_basic_flow(page):
-    Home.test_01(page)
+
+    page.open("/")
+
+    Home.click_CALCULATE_BUTTON(page)
+    Home.click_ADVANCED_CALCULATE_BUTTON(page)
+    Home.Simple_calculator_input(page)
+    Home.Name_input(page)
+    Home.Pasport_info_input(page)
+    Home.Work_edukation_input(page)
+    Home.Other_information(page)
+    Home.click_CALCULATE_BUTTON(page)
+
+    time.sleep(30)
