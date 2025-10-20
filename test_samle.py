@@ -26,11 +26,20 @@ def test_basic_flow(page):
 
     Home.click_CALCULATE_BUTTON(page)
     Home.click_ADVANCED_CALCULATE_BUTTON(page)
-    Home.Simple_calculator_input(page)
-    Home.Name_input(page)
-    Home.Pasport_info_input(page)
-    Home.Work_edukation_input(page)
-    Home.Other_information(page)
+    Home.Input_Simple_calculator(page)
+    Home.Input_Name(page)
+    Home.Input_Pasport_info(page)
+    Home.Input_Work_edukation(page)
+    Home.Input_Other_information(page)
     Home.click_CALCULATE_BUTTON(page)
 
-    time.sleep(30)
+    Home.Resoult_check(
+    page,
+    expected_decidion = "Кредит предварительно одобрен",
+    expected_rate     = "28.61 %",   
+    expected_mounthly = "16 165 Р",  
+    expected_overpaymant = "9 680 Р",
+    expected_total    = "116 165 Р",
+)
+
+    

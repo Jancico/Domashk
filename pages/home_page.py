@@ -61,9 +61,9 @@ HAS_CAR_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'в соб�
 HAS_PROPERTY_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'недвижимость')]/following::select[1]")
 
 # ===== Итог расчёта (в анкете) =====
-DIGITAL_RESULT_SECTION: Locator = (By.XPATH, "//*[contains(.,'Результат расчета')][1]/ancestor::*[self::section or self::div][1]")
+DIGITAL_RESULT_SECTION: Locator = (By.XPATH, "//*[@id=\"credit-message\"]")
 RATE_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Процентная ставка')]/following::*[self::div or self::span][1]")
-MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Ежемесячный платеж')]/following::*[self::div or self::span][1]")
+MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[@id=\"credit-monthly-payment-full\"]")
 OVERPAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Переплата по кредиту')]/following::*[self::div or self::span][1]")
 TOTAL_PAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Выплаты за весь срок кредита')]/following::*[self::div or self::span][1]")  # :contentReference[oaicite:2]{index=2}
 
@@ -104,7 +104,7 @@ def click_ADVANCED_CALCULATE_BUTTON(page: BasePage):
 
 
     """Упрощенный калькулятор"""
-def Simple_calculator_input (
+def Input_Simple_calculator (
     page: BasePage, 
     Amount:      int = 100000, 
     Downpaymant: int = 0, 
@@ -116,7 +116,7 @@ def Simple_calculator_input (
 
 
     """Поля имени фамилии и отчества"""
-def Name_input(
+def Input_Name(
     page: BasePage, 
     First_name:  str = "Злата", 
     Last_name:   str = "Ярцова", 
@@ -128,7 +128,7 @@ def Name_input(
 
 
     """Данные поспорта"""
-def Pasport_info_input(
+def Input_Pasport_info(
     page: BasePage, 
     Passport_number: str = "4300 542277", 
     Issued_by:       str = "Нижегородское ГОВД", 
@@ -140,7 +140,7 @@ def Pasport_info_input(
 
 
     """Образование и работа клиента"""
-def Work_edukation_input(
+def Input_Work_edukation(
     page: BasePage, 
     Education:  int | str = 1, 
     Work_total: int | str = 3, 
@@ -167,7 +167,7 @@ def Work_edukation_input(
     
 
     """Прочая информация"""
-def Other_information(
+def Input_Other_information(
     page: BasePage, 
     Registration_region: int | str = 1, 
     Criminal:            int | str = 3, 
@@ -183,5 +183,41 @@ def Other_information(
     Select(page.visible(CRIMINAL_RECORD_SELECT)).select_by_value(Criminal) 
     Select(page.visible(HAS_CAR_SELECT)).select_by_value(Has_car) 
     Select(page.visible(HAS_PROPERTY_SELECT)).select_by_value(Has_property) 
+
+    """Тест результата"""  
+def expect_equal(page: BasePage, locator: Locator, expected: str, label: str):
+    actual = page.text(locator).strip()
+    exp = str(expected).strip()
+    assert actual == exp, f"{label}: ожидали '{exp}', получили '{actual}'"
+
+def Resoult_check(
+    page:BasePage, 
+    expected_decidion: str,
+    expected_rate: str,
+    expected_mounthly: str,
+    expected_overpaymant: str,
+    expected_total: str):
     
+    checks = [
+    ("Решение", DIGITAL_RESULT_SECTION, expected_decidion),
+    ("Ставка", RATE_VALUE, expected_rate),
+    ("Ежемес. платёж", MONTHLY_PAYMENT_VALUE, expected_mounthly),
+    ("Переплата", OVERPAYMENT_VALUE, expected_overpaymant),
+    ("Итого", TOTAL_PAYMENT_VALUE, expected_total),
+    ]
+
     
+    for label, loc, expected in checks:
+        expect_equal(page, loc, expected, label)
+
+    print("[calc] Всё ОК — все значения совпали.")
+
+
+    
+
+DIGITAL_RESULT_SECTION: Locator = (By.XPATH, "//*[@id=\"credit-message\"]")
+RATE_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Процентная ставка')]/following::*[self::div or self::span][1]")
+MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[@id=\"credit-monthly-payment-full\"]")
+OVERPAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Переплата по кредиту')]/following::*[self::div or self::span][1]")
+TOTAL_PAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Выплаты за весь срок кредита')]/following::*[self::div or self::span][1]")  # :contentReference[oaicite:2]{index=2}
+
