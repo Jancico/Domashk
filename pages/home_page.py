@@ -1,34 +1,26 @@
-# pages/home_page.py
+
 from selenium.webdriver.common.by import By
 from core import BasePage, Locator
 from selenium.webdriver.support.ui import Select
 import time
 
 
-# здесь храним локаторы и «атомарные» действия.
-# Каждый шаг — это простая функция, которую легко вставить в тест.
 
-# Примерные локаторы для демонстрации (поменяешь на свои):
-SEARCH_INPUT: Locator = (By.XPATH, "input[name='q']")         # поле поиска
-SEARCH_BUTTON: Locator = (By.CSS_SELECTOR, "button[type='submit']")  # кнопка поиска
-TITLE: Locator = (By.TAG_NAME, "h1")                                  # заголовок на странице
-CALCULATE_BUTTON: Locator = (By.XPATH, "//*[@id='credit-data-form']/div/form/div/div[4]/button") # кнопка РАСЧИТАТЬ
-ADVANCED_CALCULATE_BUTTON: Locator = (By.XPATH, "//*[@id='credit-short-result-form']/div[2]/div[2]/a")# кнопка заполните анкету
 
-# ===== Короткий расчёт (верхняя форма) =====
+# Короткий расчёт
 CALC_AMOUNT_INPUT: Locator = (By.XPATH, "//*[@id='credit-data-form']//input[@type='text' or @type='number'][1]")  # поле 'Желаемая сумма кредита'
 CALC_DOWNPAYMENT_INPUT: Locator = (By.XPATH, "//*[@id='credit-data-form']/div/form/div/div[2]/input")  # поле 'Первоначальный взнос'
 CALC_TERM_INPUT: Locator = (By.XPATH, "//*[@id='credit-data-form']/div/form/div/div[3]/input")  # поле 'Срок кредита'
 CALCULATE_BUTTON: Locator = (By.XPATH, "//*[@id='credit-data-form']//button[.//text()[contains(.,'РАССЧИТАТЬ')]]")  # кнопка РАССЧИТАТЬ  :contentReference[oaicite:0]{index=0}
 
-# ===== Краткий результат =====
+# Краткий результат
 SHORT_RESULT_SECTION: Locator = (By.XPATH, "//*[@id='credit-short-result-form' or //*[contains(.,'Результат рассчета')]]")  # секция результата
 SHORT_MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Ежемесячный платеж')]/following::*[self::div or self::span][1]")  # значение ежемес. платежа
 ADVANCED_CALCULATE_BUTTON: Locator = (By.XPATH, "//*[@id='credit-short-result-form']//a | //a[.//text()[contains(.,'заполните анкету')]]")  # кнопка 'заполните анкету'  :contentReference[oaicite:1]{index=1}
 SHORT_NOTE_FILL_FORM: Locator = (By.XPATH, "//*[contains(.,'Расчет является примерным') and contains(.,'заполните анкету')]")  # примечание
 
-# ===== Расширенная анкета (Данные заемщика) =====
-BORROWER_FORM: Locator = (By.XPATH, "//*[@id='credit-digital-form' or //*[contains(.,'Данные заемщика')]]")  # контейнер анкеты
+# Данные заемщика
+BORROWER_FORM: Locator = (By.XPATH, "//*[@id='credit-digital-form' or //*[contains(.,'Данные заемщика')]]")  
 
 # ФИО
 LAST_NAME_INPUT: Locator = (By.XPATH, "//*[contains(normalize-space(),'Фамилия')]/following::input[1]")
@@ -60,38 +52,18 @@ CRIMINAL_RECORD_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'с
 HAS_CAR_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'в собственности автомобиль')]/following::select[1]")
 HAS_PROPERTY_SELECT: Locator = (By.XPATH, "//*[contains(normalize-space(),'недвижимость')]/following::select[1]")
 
-# ===== Итог расчёта (в анкете) =====
+# Итог расчёта 
 DIGITAL_RESULT_SECTION: Locator = (By.XPATH, "//*[@id=\"credit-message\"]")
 RATE_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Процентная ставка')]/following::*[self::div or self::span][1]")
-MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[@id=\"credit-monthly-payment-full\"]")
+MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[@id='credit-monthly-payment-full']")
 OVERPAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Переплата по кредиту')]/following::*[self::div or self::span][1]")
 TOTAL_PAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Выплаты за весь срок кредита')]/following::*[self::div or self::span][1]")  # :contentReference[oaicite:2]{index=2}
 
-# ===== Действия (кнопки) =====
-SUBMIT_APPLICATION_BUTTON: Locator = (By.XPATH, "//button[.//text()[contains(.,'ОТПРАВИТЬ ЗАЯВКУ')]]")
-SEND_TO_EMAIL_BUTTON: Locator = (By.XPATH, "//button[.//text()[contains(.,'ОТПРАВИТЬ РАСЧЕТ НА EMAIL')]]")
-BACK_TO_SHORT_RESULT_LINK: Locator = (By.XPATH, "//a[.//text()[contains(.,'ВЕРНУТЬСЯ К КРАТКОМУ РАСЧЕТУ')]]")  # :contentReference[oaicite:3]{index=3}
-
-# ===== Диалог «Обработка запроса» =====
-PROCESSING_MODAL: Locator = (By.XPATH, "//*[contains(normalize-space(),'Обработка запроса')]/ancestor::*[contains(@class,'modal')][1]")
-PROCESSING_CLOSE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Обработка запроса')]/following::button[normalize-space()='×'][1]")
-PROCESSING_TEXT: Locator = (By.XPATH, "//*[contains(normalize-space(),'Ваш запрос обрабатывается')]")
-PROCESSING_CANCEL_BUTTON: Locator = (By.XPATH, "//button[.//text()[contains(.,'Отмена')]]")  # :contentReference[oaicite:4]{index=4}
-
-# ===== Шапка/навигация/партнёры =====
-LOGIN_LINK: Locator = (By.XPATH, "//a[normalize-space()='Вход для сотрудников']")
-NAV_LOGO: Locator = (By.XPATH, "//img[contains(@src,'creditcalculator')]")
-PARTNERS_BLOCK: Locator = (By.XPATH, "//*[contains(normalize-space(),'Наши парт')]/following::*[self::ul or self::div][1]")
-PARTNER_LINKS: Locator = (By.XPATH, "//*[contains(normalize-space(),'Наши парт')]/following::*[self::ul or self::div][1]//a")  # список ссылок партнёров  :contentReference[oaicite:5]{index=5}
-
-# ===== Поля email (если открывается форма отправки расчёта) — предполагаемая разметка =====
-EMAIL_INPUT: Locator = (By.XPATH, "//input[@type='email' or @name='email' or @placeholder[contains(.,'email')]]")
-EMAIL_SEND_BUTTON: Locator = (By.XPATH, "//button[.//text()[contains(.,'Отправить')]]")
 
 
 def Open_base_page(page: BasePage):
     """Открыть главную страницу сайта."""
-    page.open("/")  # относительный путь — приклеится к base_url
+    page.open("/")  # относительный путь от base_url
 
     """нажать РАССЧИТАТЬ."""
 def click_CALCULATE_BUTTON(page: BasePage): 
@@ -215,9 +187,5 @@ def Resoult_check(
 
     
 
-DIGITAL_RESULT_SECTION: Locator = (By.XPATH, "//*[@id=\"credit-message\"]")
-RATE_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Процентная ставка')]/following::*[self::div or self::span][1]")
-MONTHLY_PAYMENT_VALUE: Locator = (By.XPATH, "//*[@id=\"credit-monthly-payment-full\"]")
-OVERPAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Переплата по кредиту')]/following::*[self::div or self::span][1]")
-TOTAL_PAYMENT_VALUE: Locator = (By.XPATH, "//*[contains(normalize-space(),'Выплаты за весь срок кредита')]/following::*[self::div or self::span][1]")  # :contentReference[oaicite:2]{index=2}
+
 
